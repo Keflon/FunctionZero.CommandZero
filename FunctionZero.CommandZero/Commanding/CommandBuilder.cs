@@ -31,7 +31,7 @@ namespace FunctionZero.CommandZero
     /// <summary>
     /// A Builder for a CommandZeroAsync instance
     /// </summary>
-    public class CommandBuilder
+    public class CommandBuilder : ICommandBuilder
     {
         private Func<object, Task> _execute;
         private Func<object, bool> _predicate;
@@ -41,6 +41,11 @@ namespace FunctionZero.CommandZero
         private IDictionary<INotifyPropertyChanged, HashSet<string>> _observedProperties;
 
         /// <summary>
+        /// This is a global implementation if IGuard that can optionally be used by commands
+        /// </summary>
+        public static IGuard GlobalGuard { get; } = new BasicGuard();
+
+        /// <summary>
         /// CommandBuilder ctor
         /// </summary>
         public CommandBuilder()
@@ -48,6 +53,7 @@ namespace FunctionZero.CommandZero
             _guardList = new List<IGuard>();
             _observedProperties = new Dictionary<INotifyPropertyChanged, HashSet<string>>();
         }
+
         /// <summary>
         /// Build the Command! :)
         /// </summary>
@@ -88,6 +94,7 @@ namespace FunctionZero.CommandZero
 
         /// <summary>
         /// Set a synchonous Execute callback that does not require a parameter
+        /// Prefer the async overload!
         /// </summary>
         /// <param name="execute">A synchonous Execute callback that does not require a parameter</param>
         /// <returns></returns>
@@ -101,6 +108,7 @@ namespace FunctionZero.CommandZero
 
         /// <summary>
         /// Set a synchonous Execute callback that requires a parameter
+        /// Prefer the async overload!
         /// </summary>
         /// <param name="execute">A synchonous Execute callback that requires a parameter</param>
         /// <returns></returns>
@@ -139,10 +147,11 @@ namespace FunctionZero.CommandZero
         }
 
         /// <summary>
-        /// Applies a global guard object to the resultant ICommand
-        /// Async Commands that share this global guard cannot execute concurrently
+        /// Adds a global guard implementation. Commands that share a guard cannot execute concurrently.<br/>
         /// Commands can be given multiple guard implementations, though individual guard implementations
-        /// can only be added once
+        /// can only be added once<br/>
+        /// *CAUTION* Watch out for deadlock if you use the same Guard across multiple Pages.<br/>
+        /// Recommendation: Implement IGuard in your ViewModel base class, e.g. by delegating to an instance of BasicGuard, so you can use the ViewModel as your Guard.<br/>
         /// </summary>
         /// <returns></returns>
         public CommandBuilder AddGlobalGuard()
@@ -154,16 +163,11 @@ namespace FunctionZero.CommandZero
         }
 
         /// <summary>
-        /// This is a global implementation if IGuard that can optionally be used by commands
-        /// </summary>
-        public static IGuard GlobalGuard { get; } = new BasicGuard();
-
-        /// <summary>
-        /// Adds a guard implementation. Commands that share a guard cannot execute concurrently.
-        /// Async Commands that share this guard cannot execute concurrently
+        /// Adds a guard implementation. Commands that share a guard cannot execute concurrently.<br/>
         /// Commands can be given multiple guard implementations, though individual guard implementations
-        /// can only be added once
-        /// *CAUTION* Watch out for deadlock if you use the same Guard across multiple Pages.
+        /// can only be added once<br/>
+        /// *CAUTION* Watch out for deadlock if you use the same Guard across multiple Pages.<br/>
+        /// Recommendation: Implement IGuard in your ViewModel base class, e.g. by delegating to an instance of BasicGuard, so you can use the ViewModel as your Guard.<br/>
         /// </summary>
         /// <param name="guard">A guard implementation to add to the Command being built</param>
         /// <returns></returns>
@@ -176,7 +180,7 @@ namespace FunctionZero.CommandZero
         }
 
         /// <summary>
-        /// Sets a delegate that can be used to retrieve the name of the resultant Command. Can be bound to by the UI etc.
+        /// Sets a delegate that can be used to retrieve the name of the Command. The UI can then bind to the <c>FriendlyName</c> property.
         /// Useful for swapping language at runtime
         /// </summary>
         /// <param name="getName">A delegate that returns a friendly name for the Command</param>
@@ -190,7 +194,7 @@ namespace FunctionZero.CommandZero
         }
 
         /// <summary>
-        /// Sets the name of the resultant Command. Can be bound to by the UI etc.
+        /// Sets the name of the Command. The UI can then bind to the <c>FriendlyName</c> property.
         /// </summary>
         /// <param name="name">The friendly name for the Command</param>
         /// <returns></returns>
@@ -202,11 +206,26 @@ namespace FunctionZero.CommandZero
             return this;
         }
 
+        /// <summary>
+        /// Optional.<br/>
+        /// The command can automatically re-evaluate the <c>CanExecute</c> delegate when a specified property changes,<br/>
+        /// allowing any UI controls that are bound to the Command to update their IsEnabled status.
+        /// </summary>
+        /// <param name="propertySource">An object that supports <c>INotifyPropertyChanged</c></param>
+        /// <param name="propertyName">The name of a property on <c>propertySource</c></param>
+        /// <returns></returns>
         public CommandBuilder AddObservedProperty(INotifyPropertyChanged propertySource, string propertyName)
         {
             return this.AddObservedProperty(propertySource, new string[] { propertyName });
         }
 
+        /// <summary>
+        /// The command can automatically re-evaluate the <c>CanExecute</c> delegate when a specified property changes,<br/>
+        /// allowing any UI controls that are bound to the Command to update their IsEnabled status.
+        /// </summary>
+        /// <param name="propertySource">An object that supports <c>INotifyPropertyChanged</c></param>
+        /// <param name="propertyNames">A comma separated list or string[] of property names on <c>propertySource</c></param>
+        /// <returns></returns>
         public CommandBuilder AddObservedProperty(INotifyPropertyChanged propertySource, params string[] propertyNames)
         {
             if (propertySource == null)
