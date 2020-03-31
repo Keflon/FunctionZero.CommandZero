@@ -110,6 +110,7 @@ Recommendation: Implement IGuard in your ViewModel base class, e.g. by delegatin
 ```csharp
 AddObservedProperty(INotifyPropertyChanged propertySource, params string[] propertyNames);
 ```
+**Caution** May leak if you *recycle* your `ViewModel` or you specify a property on an object outside the scope of your `ViewModel`
 The command can automatically re-evaluate the <c>CanExecute</c> delegate when a specified property changes,<br/>
 allowing any UI controls that are bound to the Command to update their IsEnabled status.<br/>
 **propertySource** : An object that supports `INotifyPropertyChanged`<br/>
@@ -117,6 +118,7 @@ allowing any UI controls that are bound to the Command to update their IsEnabled
 ```csharp
 AddObservedProperty(INotifyPropertyChanged propertySource, string propertyName);
 ```
+**Caution** May leak if you *recycle* your `ViewModel` or you specify a property on an object outside the scope of your `ViewModel`
 The command can automatically re-evaluate the <c>CanExecute</c> delegate when a specified property changes,<br/>
 allowing any UI controls that are bound to the Command to update their IsEnabled status.<br/>
 **propertySource** : An object that supports `INotifyPropertyChanged`<br/>
