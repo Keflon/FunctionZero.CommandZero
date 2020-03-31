@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -10,6 +10,8 @@
     <RepositoryUrl>https://github.com/Keflon/FunctionZero.CommandZero</RepositoryUrl>
     <PackageTags>ICommand Command Mvvm Xamarin Forms UWP WPF MvvmZero async</PackageTags>
     <Copyright>Function Zero Ltd</Copyright>
+    <PackageReleaseNotes>Hope you like it</PackageReleaseNotes>
+    <Company>Function Zero Ltd</Company>
   </PropertyGroup>
 
   <ItemGroup>
