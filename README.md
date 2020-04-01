@@ -81,7 +81,7 @@ If there is need to re-evaluate the result of `CanExecute`, it is up to the deve
 so UI (usually a `Button`) can update its `IsEnabled` flag. This is often done in an `OnPropertyChanged` overload on the `ViewModel`  
 Alternatively, you can call `.AddObservedProperty` to specify the property or properties that will trigger such a re-evaluation
 **Caution** May leak if you *recycle* your `ViewModel` and your `Commands` are built outside of your constructor, 
-or if you specify a property on an object outside the scope of your `ViewModel`
+or if you specify a property on an object outside the scope of your `ViewModel`  
 ```csharp
 // Any Buttons bound to this command will refresh their IsEnabled flag if IsBusy or IsFaulted changes. 
 // Note: IsBusy must raise INotifyPropertyChanged
@@ -115,21 +115,21 @@ can only be added once
 ```csharp
 AddObservedProperty(INotifyPropertyChanged propertySource, params string[] propertyNames);
 ```
-**Caution** May leak if you *recycle* your `ViewModel` and your `Commands` are built outside of your constructor, 
-or if you specify a property on an object outside the scope of your `ViewModel`
-The command can automatically re-evaluate the <c>CanExecute</c> delegate when a specified property changes,  
+The command can automatically re-evaluate the `CanExecute` delegate when a specified property changes,  
 allowing any UI controls that are bound to the Command to update their IsEnabled status.  
 **propertySource** : An object that supports `INotifyPropertyChanged`  
-**propertyName** : The name of a property on `propertySource`
+**propertyName** : The name of a property on `propertySource`  
+**Caution** May leak if you *recycle* your `ViewModel` and your `Commands` are built outside of your constructor, 
+or if you specify a property on an object outside the scope of your `ViewModel`
 ```csharp
 AddObservedProperty(INotifyPropertyChanged propertySource, string propertyName);
 ```
-**Caution** May leak if you *recycle* your `ViewModel` and your `Commands` are built outside of your constructor, 
-or if you specify a property on an object outside the scope of your `ViewModel`
-The command can automatically re-evaluate the <c>CanExecute</c> delegate when a specified property changes,  
+The command can automatically re-evaluate the `CanExecute` delegate when a specified property changes,  
 allowing any UI controls that are bound to the Command to update their IsEnabled status.  
 **propertySource** : An object that supports `INotifyPropertyChanged`  
-**propertyNames** : Comma separated list of `propertyNames` found on `propertySource`
+**propertyNames** : Comma separated list of `propertyNames` found on `propertySource`  
+**Caution** May leak if you *recycle* your `ViewModel` and your `Commands` are built outside of your constructor, 
+or if you specify a property on an object outside the scope of your `ViewModel`
 ```csharp
 CommandZeroAsync Build();
 ```
