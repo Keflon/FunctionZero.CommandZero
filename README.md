@@ -15,7 +15,7 @@ ICommand RedPillCommand = new CommandBuilder()
                 .Build(); 
 ```
 
-SetExecute and SetCanExecute have overloads that can take parameters:
+Many Builder methods have sensible overloads, for example SetExecute and SetCanExecute can take a `CommandParameter`:
 ```csharp
 RedPillCommand = new CommandBuilder()
                 .SetExecute(async(obj) => await DoSomething(obj))
@@ -26,7 +26,7 @@ RedPillCommand = new CommandBuilder()
 ## IGuard
 Every `Command` that shares the same `IGuard` implementation will be disabled if **any one of them** is performing a long-running task  
 In the following example, assuming a `Button` is bound to `GetDataCommandExecute` and another `Button` is bound to `NextCommand`, 
-clicking the 'Get Data' button will disable **both** Commands for 5 seconds.
+clicking the 'Get Data' button will disable **both** Commands, and therefore **both** `Buttons`, for 5 seconds
 ```csharp
 public class HomePageVm : BaseVm
 {
