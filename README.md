@@ -8,7 +8,9 @@ CommandZeroAsync uses fluent API to build instances quickly and easily, like thi
 ```csharp
 ICommand RedPillCommand = new CommandBuilder()
                 .SetExecute(async() => await DoSomething())
-                .SetCanExecute(() => CanDoSomething()).
+                .SetCanExecute(() => CanDoSomething())
+                .AddGuard(this)
+                .SetName("Take the Red Pill")
                 // More builder methods can go here ...
                 .Build(); 
 ```
@@ -22,7 +24,7 @@ RedPillCommand = new CommandBuilder()
 ```
 
 ## IGuard
-Every `Command` that shares the same `IGuard` implementation will be disabled if **any one of them** is performing a long-running task<br/>
+Every `Command` that shares the same `IGuard` implementation will be disabled if **any one of them** is performing a long-running task  
 In the following example, assuming a `Button` is bound to `GetDataCommandExecute` and another `Button` is bound to `NextCommand`, 
 clicking the 'Get Data' button will disable **both** Commands for 5 seconds.
 ```csharp
@@ -68,7 +70,7 @@ public class HomePageVm : BaseVm
 If your `ViewModel` implements IGuard, that simply becomes **`.AddGuard(this)`**
 
 ## Command FriendlyName
-`.SetName(string name`) sets a `FriendlyName` property on the `Command` that the UI can bind to<br/>
+`.SetName(string name`) sets a `FriendlyName` property on the `Command` that the UI can bind to  
 `.SetName(Func<string>)` sets a `FriendlyName` method on the `Command` that the UI can bind to
 ```xaml
 <Button Command="{Binding NextCommand}" Text="{Binding NextCommand.FriendlyName}" />
@@ -76,9 +78,10 @@ If your `ViewModel` implements IGuard, that simply becomes **`.AddGuard(this)`**
 
 ## Automatically calling ChangeCanExecute
 If there is need to re-evaluate the result of `CanExecute`, it is up to the developer to call `ChangeCanExecute` 
-so UI (usually a `Button`) can update its `IsEnabled` flag. This is often done in an `OnPropertyChanged` overload on the `ViewModel`<br/>
+so UI (usually a `Button`) can update its `IsEnabled` flag. This is often done in an `OnPropertyChanged` overload on the `ViewModel`  
 Alternatively, you can call `.AddObservedProperty` to specify the property or properties that will trigger such a re-evaluation
-**Caution** May leak if you *recycle* your `ViewModel` or you specify a property on an object outside the scope of your `ViewModel`
+**Caution** May leak if you *recycle* your `ViewModel` and your `Commands` are built outside of your constructor, 
+or if you specify a property on an object outside the scope of your `ViewModel`
 ```csharp
 // Any Buttons bound to this command will refresh their IsEnabled flag if IsBusy or IsFaulted changes. 
 // Note: IsBusy must raise INotifyPropertyChanged
@@ -94,36 +97,38 @@ DoSomethingCommand = new CommandBuilder()
 ```csharp
 AddGlobalGuard();
 ```
-Adds a global guard implementation. Commands that share a guard cannot execute concurrently.<br/>
+Adds a global guard implementation. Commands that share a guard cannot execute concurrently.  
 Commands can be given multiple guard implementations, though individual guard implementations
-can only be added once<br/>
-*CAUTION* Watch out for deadlock if you use the same Guard across multiple Pages.<br/>
+can only be added once  
+*CAUTION* Watch out for deadlock if you use the same Guard across multiple Pages.  
 **Recommendation:** Implement `IGuard` in your ViewModel base class, e.g. by delegating to an instance of BasicGuard, so you can use the ViewModel ('this') as your Guard.<br/> 
 
 ```csharp
 AddGuard(IGuard guard);
 ```
-Adds a guard implementation. Commands that share a guard cannot execute concurrently.<br/>
+Adds a guard implementation. Commands that share a guard cannot execute concurrently.  
 Commands can be given multiple guard implementations, though individual guard implementations
-can only be added once<br/>
-*CAUTION* Watch out for deadlock if you use the same Guard across multiple Pages.<br/>
+can only be added once  
+*CAUTION* Watch out for deadlock if you use the same Guard across multiple Pages.  
 **Recommendation:** Implement `IGuard` in your `ViewModel` base class, e.g. by delegating to an instance of `BasicGuard`, so you can use the '`this`' as your Guard.<br/>
   
 ```csharp
 AddObservedProperty(INotifyPropertyChanged propertySource, params string[] propertyNames);
 ```
-***Caution** May leak if you *recycle* your `ViewModel` or you specify a property on an object outside the scope of your `ViewModel`**
-The command can automatically re-evaluate the <c>CanExecute</c> delegate when a specified property changes,<br/>
-allowing any UI controls that are bound to the Command to update their IsEnabled status.<br/>
-**propertySource** : An object that supports `INotifyPropertyChanged`<br/>
+**Caution** May leak if you *recycle* your `ViewModel` and your `Commands` are built outside of your constructor, 
+or if you specify a property on an object outside the scope of your `ViewModel`
+The command can automatically re-evaluate the <c>CanExecute</c> delegate when a specified property changes,  
+allowing any UI controls that are bound to the Command to update their IsEnabled status.  
+**propertySource** : An object that supports `INotifyPropertyChanged`  
 **propertyName** : The name of a property on `propertySource`
 ```csharp
 AddObservedProperty(INotifyPropertyChanged propertySource, string propertyName);
 ```
-***Caution** May leak if you *recycle* your `ViewModel` or you specify a property on an object outside the scope of your `ViewModel`**
-The command can automatically re-evaluate the <c>CanExecute</c> delegate when a specified property changes,<br/>
-allowing any UI controls that are bound to the Command to update their IsEnabled status.<br/>
-**propertySource** : An object that supports `INotifyPropertyChanged`<br/>
+**Caution** May leak if you *recycle* your `ViewModel` and your `Commands` are built outside of your constructor, 
+or if you specify a property on an object outside the scope of your `ViewModel`
+The command can automatically re-evaluate the <c>CanExecute</c> delegate when a specified property changes,  
+allowing any UI controls that are bound to the Command to update their IsEnabled status.  
+**propertySource** : An object that supports `INotifyPropertyChanged`  
 **propertyNames** : Comma separated list of `propertyNames` found on `propertySource`
 ```csharp
 CommandZeroAsync Build();
