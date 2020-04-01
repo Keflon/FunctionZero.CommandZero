@@ -70,7 +70,7 @@ public class HomePageVm : BaseVm
 If your `ViewModel` implements IGuard, that simply becomes **`.AddGuard(this)`**
 
 ## Command FriendlyName
-`.SetName(string name`) sets a `FriendlyName` property on the `Command` that the UI can bind to  
+`.SetName(string name)` sets a `FriendlyName` property on the `Command` that the UI can bind to  
 `.SetName(Func<string>)` sets a `FriendlyName` method on the `Command` that the UI can bind to
 ```xaml
 <Button Command="{Binding NextCommand}" Text="{Binding NextCommand.FriendlyName}" />
@@ -95,7 +95,7 @@ DoSomethingCommand = new CommandBuilder()
 
 ## Builder methods:
 ```csharp
-AddGlobalGuard();
+AddGlobalGuard()
 ```
 Adds a global guard implementation. Commands that share a guard cannot execute concurrently.  
 Commands can be given multiple guard implementations, though individual guard implementations
@@ -104,7 +104,7 @@ can only be added once
 **Recommendation:** Implement `IGuard` in your ViewModel base class, e.g. by delegating to an instance of BasicGuard, so you can use the ViewModel ('this') as your Guard.<br/> 
 
 ```csharp
-AddGuard(IGuard guard);
+AddGuard(IGuard guard)
 ```
 Adds a guard implementation. Commands that share a guard cannot execute concurrently.  
 Commands can be given multiple guard implementations, though individual guard implementations
@@ -113,7 +113,7 @@ can only be added once
 **Recommendation:** Implement `IGuard` in your `ViewModel` base class, e.g. by delegating to an instance of `BasicGuard`, so you can use the '`this`' as your Guard.<br/>
   
 ```csharp
-AddObservedProperty(INotifyPropertyChanged propertySource, params string[] propertyNames);
+AddObservedProperty(INotifyPropertyChanged propertySource, params string[] propertyNames)
 ```
 The command can automatically re-evaluate the `CanExecute` delegate when a specified property changes,  
 allowing any UI controls that are bound to the Command to update their IsEnabled status.  
@@ -122,7 +122,7 @@ allowing any UI controls that are bound to the Command to update their IsEnabled
 **Caution** May leak if you *recycle* your `ViewModel` and your `Commands` are built outside of your constructor, 
 or if you specify a property on an object outside the scope of your `ViewModel`
 ```csharp
-AddObservedProperty(INotifyPropertyChanged propertySource, string propertyName);
+AddObservedProperty(INotifyPropertyChanged propertySource, string propertyName)
 ```
 The command can automatically re-evaluate the `CanExecute` delegate when a specified property changes,  
 allowing any UI controls that are bound to the Command to update their IsEnabled status.  
@@ -135,31 +135,36 @@ CommandZeroAsync Build();
 ```
 Build the Command :)
 ```csharp
-CommandBuilder SetCanExecute(Func<bool> canExecute);
+CommandBuilder SetCanExecute(Func<bool> canExecute)
 ```
 Set a CanExecute callback that does not require a parameter
 ```csharp
-SetCanExecute(Func<object, bool> canExecute);
+SetCanExecute(Func<object, bool> canExecute)
 ```
 Set a CanExecute callback that requires a parameter
 ```csharp
-SetExecute(Action execute);
+SetExecute(Action execute)
 ```
 Set a synchonous Execute callback that does not require a parameter. Prefer the `async` overload!
 ```csharp
-SetExecute(Action<object> execute);
+SetExecute(Action<object> execute)
 ```
 Set a synchonous Execute callback that requires a parameter. Prefer the `async` overload!
 ```csharp
-SetExecute(Func<object, Task> execute);
+SetExecute(Func<object, Task> execute)
 ```
 Set an asynchronous Execute callback that requires a parameter
 ```csharp
-SetExecute(Func<Task> execute);
+SetExecute(Func<Task> execute)
 ```
 Set an asynchronous Execute callback that does not require a parameter
 ```csharp
-SetName(Func<string> getName);
+SetName(Func<string> getName)
 ```
 Sets a delegate that can be used to retrieve the name of the Command. The UI can then bind to the `FriendlyName` property
+Useful for internationalisation
+```csharp
+SetName(string name)
+```
+Sets the name of the Command. The UI can then bind to the `FriendlyName` property
 Useful for internationalisation
