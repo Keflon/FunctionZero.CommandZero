@@ -26,21 +26,24 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace FunctionZero.CommandZero
 {
-    public class CommandZeroAsync : ICommand
+    public class CommandZeroAsync : ICommand, INotifyPropertyChanged
     {
         private readonly IEnumerable<IGuard> _guardList;
         private readonly Func<object, bool> _canExecute;
         private readonly Func<object, Task> _execute;
         private int _raisedGuardCount;
+        private bool _nameCanChange;
         /// <summary>
         /// Occurs when the target of the Command should reevaluate whether or not the Command can be executed.
         /// </summary>
         private event EventHandler CanExecuteChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public Func<string> NameGetter { get; }
 
@@ -53,6 +56,7 @@ namespace FunctionZero.CommandZero
             Func<object, Task> execute,
             Func<object, bool> canExecute,
             Func<string> nameGetter,
+            bool nameCanChange,
             IDictionary<INotifyPropertyChanged, HashSet<string>> observables
             )
         {
@@ -60,6 +64,7 @@ namespace FunctionZero.CommandZero
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute ?? ((o) => true);
             NameGetter = nameGetter ?? (() => string.Empty);
+            _nameCanChange = nameCanChange;
 
             _observables = observables ?? new Dictionary<INotifyPropertyChanged, HashSet<string>>();
 
@@ -167,9 +172,14 @@ namespace FunctionZero.CommandZero
 
         public void ChangeCanExecute()
         {
+            if(_nameCanChange)
+                OnPropertyChanged(nameof(FriendlyName));
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
 
-
+        protected void OnPropertyChanged([CallerMemberName] string propertyName=null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

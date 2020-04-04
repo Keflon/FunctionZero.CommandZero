@@ -39,6 +39,7 @@ namespace FunctionZero.CommandZero
         private Func<string> _getName;
         private bool _hasBuilt;
         private IDictionary<INotifyPropertyChanged, HashSet<string>> _observedProperties;
+        private bool _nameCanChange;
 
         /// <summary>
         /// This is a global implementation if IGuard that can optionally be used by commands
@@ -63,7 +64,7 @@ namespace FunctionZero.CommandZero
             if (_hasBuilt)
                 throw new InvalidOperationException("This CommandBuilder has expired. You cannot call Build more than once.");
             _hasBuilt = true;
-            return new CommandZeroAsync(_guardList, _execute, _predicate, _getName, _observedProperties);
+            return new CommandZeroAsync(_guardList, _execute, _predicate, _getName, _nameCanChange, _observedProperties);
         }
 
         /// <summary>
@@ -190,6 +191,7 @@ namespace FunctionZero.CommandZero
             if (_getName != null)
                 throw new NotSupportedException("SetName cannot be called more than once");
             _getName = getName;
+            _nameCanChange = true;
             return this;
         }
 
@@ -203,6 +205,7 @@ namespace FunctionZero.CommandZero
             if (_getName != null)
                 throw new NotSupportedException("SetName cannot be called more than once");
             _getName = () => name;
+            _nameCanChange = false;
             return this;
         }
 
