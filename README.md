@@ -101,7 +101,7 @@ Adds a global guard implementation. Commands that share a guard cannot execute c
 Commands can be given multiple guard implementations, though individual guard implementations
 can only be added once  
 *CAUTION* Watch out for deadlock if you use the same Guard across multiple Pages.  
-**Recommendation:** Implement `IGuard` in your ViewModel base class, e.g. by delegating to an instance of BasicGuard, so you can use the ViewModel ('this') as your Guard.<br/> 
+**Recommendation:** Implement `IGuard` in your ViewModel base class, e.g. by delegating to an instance of BasicGuard, so you can use the ViewModel ('this') as your Guard.   
 
 ```csharp
 AddGuard(IGuard guard)
@@ -110,7 +110,7 @@ Adds a guard implementation. Commands that share a guard cannot execute concurre
 Commands can be given multiple guard implementations, though individual guard implementations
 can only be added once  
 *CAUTION* Watch out for deadlock if you use the same Guard across multiple Pages.  
-**Recommendation:** Implement `IGuard` in your `ViewModel` base class, e.g. by delegating to an instance of `BasicGuard`, so you can use the '`this`' as your Guard.<br/>
+**Recommendation:** Implement `IGuard` in your `ViewModel` base class, e.g. by delegating to an instance of `BasicGuard`, so you can use the '`this`' as your Guard.  
   
 ```csharp
 AddObservedProperty(INotifyPropertyChanged propertySource, params string[] propertyNames)

@@ -97,7 +97,7 @@ namespace FunctionZero.CommandZero
         private void ObservedPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if(_observables[(INotifyPropertyChanged)sender].Contains(e.PropertyName))
-                this.CanExecuteChanged(this, EventArgs.Empty);
+                ChangeCanExecute();
         }
 
         public bool CanExecute(object parameter)
