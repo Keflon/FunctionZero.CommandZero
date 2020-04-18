@@ -6,18 +6,18 @@ Fully featured ICommand implementation
 
 CommandZeroAsync uses fluent API to build instances quickly and easily, like this:  
 ```csharp
-ICommand RadishCommand = new CommandBuilder()
+ICommand CabbagesCommand = new CommandBuilder()
                 .SetExecute(async() => await DoSomething())
                 .SetCanExecute(() => CanDoSomething())
                 .AddGuard(this)
-                .SetName("Radish")
+                .SetName("Cabbages")
                 // More builder methods can go here ...
                 .Build(); 
 ```
 
 Many Builder methods have sensible overloads, for example SetExecute and SetCanExecute can take a `CommandParameter`:
 ```csharp
-RadishesCommand = new CommandBuilder()
+CabbagesCommand = new CommandBuilder()
                 .SetExecute(async(obj) => await DoSomething(obj))
                 .SetCanExecute((obj) => CanDoSomething(obj))
                 ...
