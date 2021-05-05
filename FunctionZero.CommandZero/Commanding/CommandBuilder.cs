@@ -40,6 +40,7 @@ namespace FunctionZero.CommandZero
         private bool _hasBuilt;
         private IDictionary<INotifyPropertyChanged, HashSet<string>> _observedProperties;
         private bool _nameCanChange;
+        private Action<ICommandZero, Exception> _exceptionHandler;
 
         /// <summary>
         /// This is a global implementation if IGuard that can optionally be used by commands
@@ -64,7 +65,7 @@ namespace FunctionZero.CommandZero
             if (_hasBuilt)
                 throw new InvalidOperationException("This CommandBuilder has expired. You cannot call Build more than once.");
             _hasBuilt = true;
-            return new CommandZeroAsync(_guardList, _execute, _predicate, _getName, _nameCanChange, _observedProperties);
+            return new CommandZeroAsync(_guardList, _execute, _predicate, _getName, _nameCanChange, _observedProperties, _exceptionHandler);
         }
 
         /// <summary>
@@ -72,7 +73,7 @@ namespace FunctionZero.CommandZero
         /// </summary>
         /// <param name="execute">An asynchronous Execute callback that requires a parameter</param>
         /// <returns></returns>
-        public CommandBuilder SetExecute(Func<object, Task> execute)
+        public CommandBuilder SetExecuteAsync(Func<object, Task> execute)
         {
             if (_execute != null)
                 throw new NotSupportedException("SetExecute cannot be called more than once");
@@ -85,7 +86,7 @@ namespace FunctionZero.CommandZero
         /// </summary>
         /// <param name="execute">An asynchronous Execute callback that requires a parameter</param>
         /// <returns></returns>
-        public CommandBuilder SetExecute(Func<Task> execute)
+        public CommandBuilder SetExecuteAsync(Func<Task> execute)
         {
             if (_execute != null)
                 throw new NotSupportedException("SetExecute cannot be called more than once");
@@ -95,7 +96,7 @@ namespace FunctionZero.CommandZero
 
         /// <summary>
         /// Set a synchonous Execute callback that does not require a parameter
-        /// Prefer the async overload!
+        /// Prefer SetExecuteAsync
         /// </summary>
         /// <param name="execute">A synchonous Execute callback that does not require a parameter</param>
         /// <returns></returns>
@@ -109,7 +110,7 @@ namespace FunctionZero.CommandZero
 
         /// <summary>
         /// Set a synchonous Execute callback that requires a parameter
-        /// Prefer the async overload!
+        /// Prefer SetExecuteAsync
         /// </summary>
         /// <param name="execute">A synchonous Execute callback that requires a parameter</param>
         /// <returns></returns>
@@ -243,6 +244,28 @@ namespace FunctionZero.CommandZero
             foreach (string propertyName in propertyNames)
                 _observedProperties[propertySource].Add(propertyName);
 
+            return this;
+        }
+
+        public CommandBuilder SetExceptionHandler(Action<ICommandZero, Exception> exceptionHandler)
+        {
+            if (_exceptionHandler != null)
+                throw new NotSupportedException("SetExceptionHandler cannot be called more than once");
+            _exceptionHandler = exceptionHandler;
+            return this;
+        }
+
+        [Obsolete("Please use SetExecuteAsync")]
+        public CommandBuilder SetExecute(Func<object, Task> execute)
+        {
+            SetExecuteAsync(execute);
+            return this;
+        }
+
+        [Obsolete("Please use SetExecuteAsync")]
+        public CommandBuilder SetExecute(Func<Task> execute)
+        {
+            SetExecuteAsync(execute);
             return this;
         }
     }

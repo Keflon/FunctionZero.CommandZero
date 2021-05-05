@@ -1,7 +1,7 @@
 ﻿/*
 MIT License
 
-Copyright(c) 2019 - 2020 Function Zero Ltd
+Copyright(c) 2019 - 2021 Function Zero Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,11 +32,12 @@ using System.Windows.Input;
 
 namespace FunctionZero.CommandZero
 {
-    public class CommandZeroAsync : ICommand, INotifyPropertyChanged
+    public class CommandZeroAsync : ICommandZero, INotifyPropertyChanged
     {
         private readonly IEnumerable<IGuard> _guardList;
         private readonly Func<object, bool> _canExecute;
-        private readonly Func<object, Task> _execute;
+        private readonly Func<object, Task> _executeAsync;
+        private readonly Action<ICommandZero, Exception> _exceptionHandler;
         private int _raisedGuardCount;
         private bool _nameCanChange;
         /// <summary>
@@ -49,24 +50,27 @@ namespace FunctionZero.CommandZero
 
         private readonly IDictionary<INotifyPropertyChanged, HashSet<string>> _observables;
 
+        [Obsolete("Please use the Text property instead")]
         public string FriendlyName => NameGetter();
+        public string Text => NameGetter();
 
         public CommandZeroAsync(
             IEnumerable<IGuard> guardList,
-            Func<object, Task> execute,
+            Func<object, Task> executeAsync,
             Func<object, bool> canExecute,
             Func<string> nameGetter,
             bool nameCanChange,
-            IDictionary<INotifyPropertyChanged, HashSet<string>> observables
+            IDictionary<INotifyPropertyChanged, HashSet<string>> observables,
+            Action<ICommandZero, Exception> exceptionHandler
             )
         {
             _guardList = guardList ?? throw new ArgumentNullException(nameof(guardList));
-            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _executeAsync = executeAsync ?? throw new ArgumentNullException(nameof(executeAsync));
             _canExecute = canExecute ?? ((o) => true);
             NameGetter = nameGetter ?? (() => string.Empty);
             _nameCanChange = nameCanChange;
-
             _observables = observables ?? new Dictionary<INotifyPropertyChanged, HashSet<string>>();
+            _exceptionHandler = exceptionHandler ?? ((sender, ex) => { });
 
             foreach (var guard in _guardList)
             {
@@ -75,7 +79,7 @@ namespace FunctionZero.CommandZero
                 guard.GuardChanged += Guard_GuardChanged;
             }
 
-            foreach(KeyValuePair<INotifyPropertyChanged, HashSet<string>> item in _observables)
+            foreach (KeyValuePair<INotifyPropertyChanged, HashSet<string>> item in _observables)
                 item.Key.PropertyChanged += ObservedPropertyChanged;
         }
 
@@ -96,7 +100,7 @@ namespace FunctionZero.CommandZero
 
         private void ObservedPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if(_observables[(INotifyPropertyChanged)sender].Contains(e.PropertyName))
+            if (_observables[(INotifyPropertyChanged)sender].Contains(e.PropertyName))
                 ChangeCanExecute();
         }
 
@@ -152,7 +156,7 @@ namespace FunctionZero.CommandZero
                 {
                     foreach (var guard in _guardList)
                         guard.IsGuardRaised = true;
-                    await _execute(parameter);
+                    await _executeAsync(parameter);
                     return true;
                 }
                 catch (Exception ex)
@@ -160,6 +164,8 @@ namespace FunctionZero.CommandZero
                     // TODO: Re-throw a suitable exception. 
                     // TODO: Either the original exception or the original exception wrapped in a GuardCommandException
                     Debug.WriteLine($"GuardCommandAsync exception. Message: {ex.Message}");
+
+                    _exceptionHandler(this, ex);
                 }
                 finally
                 {
@@ -172,14 +178,19 @@ namespace FunctionZero.CommandZero
 
         public void ChangeCanExecute()
         {
-            if(_nameCanChange)
+            if (_nameCanChange)
+            {
                 OnPropertyChanged(nameof(FriendlyName));
+                OnPropertyChanged(nameof(Text));
+            }
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName=null)
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public override string ToString() => NameGetter();
     }
 }
