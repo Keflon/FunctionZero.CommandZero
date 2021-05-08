@@ -4,35 +4,63 @@ Fully featured ICommand implementation
 
 ## Usage
 
-CommandZeroAsync uses fluent API to build instances quickly and easily, like this:  
+CommandZeroAsync uses fluent API to build `ICommand` instances quickly and easily, like this:  
 ```csharp
 ICommand CabbagesCommand = new CommandBuilder()
-                .SetExecute(async() => await DoSomething())
-                .SetCanExecute(() => CanDoSomething())
+                .SetExecuteAsync(DoSomethingAsync)
+                .SetCanExecute(CanDoSomething)
                 .AddGuard(this)
                 .SetName("Cabbages")
                 // More builder methods can go here ...
                 .Build(); 
 ```
+Where
+```csharp
+private async Task DoSomethingAsync()
+{
+    // Do something awesome
+}
+private bool CanDoSomething()
+{
+    return blah;
+}
+```
 
-Many Builder methods have sensible overloads, for example SetExecute and SetCanExecute can take a `CommandParameter`:
+Many Builder methods have sensible overloads, for example `SetExecuteAsync` and `SetCanExecute` can take a `CommandParameter`:
+```csharp
+private async Task DoSomethingAsync(object someParameter)
+{
+    // Do something awesome
+}
+private bool CanDoSomething(object someParameter)
+{
+    return blah;
+}
+```
+Or with lambda functions:
 ```csharp
 CabbagesCommand = new CommandBuilder()
-                .SetExecute(async(obj) => await DoSomething(obj))
+                .SetExecuteAsync(async(obj) => await DoSomethingAsync(obj))
                 .SetCanExecute((obj) => CanDoSomething(obj))
                 ...
 ```
 
+For the async-averse there are synchronous `SetExecute` builder methods.
+
+
+
+
 ## IGuard
-Every `Command` that shares the same `IGuard` implementation will be disabled if **any one of them** is performing a long-running task  
-In the following example, assuming a `Button` is bound to `GetDataCommandExecute` and another `Button` is bound to `NextCommand`, 
+Are your ViewModels littered with `IsBusy` flags? Now you can remove them all.  
+Every `Command` that shares the same `IGuard` implementation will be disabled if **any one of them** is performing a long-running task.  
+In the following example, assuming a `Button` is bound to `GetDataCommand` and another `Button` is bound to `NextCommand`, 
 clicking the 'Get Data' button will disable **both** Commands, and therefore **both** `Buttons`, for 5 seconds
 ```csharp
 public class HomePageVm : BaseVm
 {
         // UI binds to these commands ...
-        public CommandZeroAsync GetDataCommand { get; }
-        public CommandZeroAsync NextCommand { get; }
+        public ICommandZero GetDataCommand { get; }
+        public ICommandZero NextCommand { get; }
 
         private IPageServiceZero _pageService;
     
@@ -43,37 +71,38 @@ public class HomePageVm : BaseVm
 
             GetDataCommand = new CommandBuilder()
                                         .AddGuard(pageGuard)
-                                        .SetExecute(GetDataCommandExecute)
+                                        .SetExecuteAsync(GetDataCommandExecuteAsync)
                                         .SetName("Get Data")
                                         .Build();
             NextCommand = new CommandBuilder()
                                         .AddGuard(pageGuard)
-                                        .SetExecute(NextCommandExecute)
+                                        .SetExecute(NextCommandExecuteAsync)
                                         .SetName("Next")
                                         .Build();
         }
 
-        private async Task GetDataCommandExecute()
+        private async Task GetDataCommandExecuteAsync()
         {
             // Simulate a long-running task ...
             await Task.Delay(5000);
         }
 
-        private async Task NextCommandExecute()
+        private async Task NextCommandExecuteAsync()
         {
-            // Subtle plug for FunctionZero.MvvmZero v2.0.0
+            // Subtle plug for FunctionZero.MvvmZero
             await _pageService.PushPageAsync<ResultsPage, ResultsPageVm>((vm)=>vm.SetState("Message from HomePageVm!!"));
         }
 }
 ```
 
-If your `ViewModel` implements IGuard, that simply becomes **`.AddGuard(this)`**
+If your `ViewModel` implements IGuard, that simply becomes **`.AddGuard(this)`**  
+The [MvvmZero NuGet package](https://www.nuget.org/packages/FunctionZero.MvvmZero) has `MvvmZeroBaseVm` that implements `IGuard`
 
-## Command FriendlyName
-`.SetName(string name)` sets a `FriendlyName` property on the `Command` that the UI can bind to  
-`.SetName(Func<string>)` sets a `FriendlyName` method on the `Command` that the UI can bind to
+## Command Text (formerly 'FriendlyName')
+`.SetName(string name)` sets a `Text` property on the `Command` that the UI can bind to.  
+Alternatively, `.SetName(Func<string>)` sets a method that is called to evaluate the `Text` property.
 ```xaml
-<Button Command="{Binding NextCommand}" Text="{Binding NextCommand.FriendlyName}" />
+<Button Command="{Binding NextCommand}" Text="{Binding NextCommand.Text}" />
 ```
 
 ## Automatically calling ChangeCanExecute
@@ -87,7 +116,7 @@ or if you specify a property on an object outside the scope of your `ViewModel`
 // Note: IsBusy must raise INotifyPropertyChanged
 DoSomethingCommand = new CommandBuilder()
                             .SetCanExecute(() => IsBusy || IsFaulted)
-                            .SetExecute(()=>{...})
+                            .SetExecuteAsync(()=>{...})
                             .AddObservedProperty(nameof(IsBusy), nameof(IsFaulted))
                             .SetName("Do something")
                             .Build();
@@ -151,20 +180,20 @@ SetExecute(Action<object> execute)
 ```
 Set a synchonous Execute callback that requires a parameter. Prefer the `async` overload!
 ```csharp
-SetExecute(Func<object, Task> execute)
+SetExecuteAsync(Func<object, Task> execute)
 ```
 Set an asynchronous Execute callback that requires a parameter
 ```csharp
-SetExecute(Func<Task> execute)
+SetExecuteAsync(Func<Task> execute)
 ```
 Set an asynchronous Execute callback that does not require a parameter
 ```csharp
 SetName(Func<string> getName)
 ```
-Sets a delegate that can be used to retrieve the name of the Command. The UI can then bind to the `FriendlyName` property
+Sets a delegate that can be used to retrieve the name of the Command. The UI can then bind to the `Text` property
 Useful for internationalisation
 ```csharp
 SetName(string name)
 ```
-Sets the name of the Command. The UI can then bind to the `FriendlyName` property
-Useful for internationalisation
+Sets the name of the Command. The UI can then bind to the `Text` property
+Useful for internationalisation.
