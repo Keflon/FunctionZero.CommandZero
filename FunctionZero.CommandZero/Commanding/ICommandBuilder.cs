@@ -47,10 +47,6 @@ namespace FunctionZero.CommandZero
         CommandBuilder SetExecuteAsync(Func<object, Task> execute);
         CommandBuilder SetExecuteAsync(Func<Task> execute);
 
-
-
-
-
         CommandBuilder SetName(Func<string> getName);
         CommandBuilder SetName(string name);
         CommandBuilder SetExceptionHandler(Action<ICommandZero, Exception> exceptionHandler);

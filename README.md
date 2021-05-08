@@ -11,6 +11,7 @@ ICommand CabbagesCommand = new CommandBuilder()
                 .SetCanExecute(CanDoSomething)
                 .AddGuard(this)
                 .SetName("Cabbages")
+                .SetExceptionHandler(CabbagesExceptionHandler)
                 // More builder methods can go here ...
                 .Build(); 
 ```
@@ -22,11 +23,15 @@ private async Task DoSomethingAsync()
 }
 private bool CanDoSomething()
 {
-    return blah;
+    return CanDoSomethingAwesome;
+}
+private void CabbagesExceptionHandler(ICommandZero sourceCommand, Exception ex)
+{
+    Logger.Log("Not quite awesome yet");
 }
 ```
 
-Many Builder methods have sensible overloads, for example `SetExecuteAsync` and `SetCanExecute` can take a `CommandParameter`:
+Many Builder methods have sensible overloads, for example `SetExecuteAsync`, `SetExecute` and `SetCanExecute` can take a `CommandParameter`:
 ```csharp
 private async Task DoSomethingAsync(object someParameter)
 {
@@ -197,3 +202,7 @@ SetName(string name)
 ```
 Sets the name of the Command. The UI can then bind to the `Text` property
 Useful for internationalisation.
+```csharp
+SetExceptionHandler(Action<ICommandZero, Exception> exceptionHandler)
+```
+Sets a callback for if you want to capture any exceptions thrown by a Command.
