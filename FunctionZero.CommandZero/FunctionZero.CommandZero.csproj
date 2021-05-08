@@ -4,13 +4,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Version>1.1.0</Version>
     <Authors>Keith Pickford</Authors>
-    <Description>Fully featured ICommand implementation</Description>
+    <Description>Fully featured async ICommand implementation with builder methods.</Description>
     <PackageLicenseFile>License.txt</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/Keflon/FunctionZero.CommandZero</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Keflon/FunctionZero.CommandZero</RepositoryUrl>
-    <PackageTags>ICommand Command Mvvm Xamarin Forms UWP WPF MvvmZero async</PackageTags>
+    <PackageTags>ICommand ICommandZero Command Mvvm Xamarin Forms Maui UWP WPF MvvmZero async fluent</PackageTags>
     <Copyright>Function Zero Ltd</Copyright>
-    <PackageReleaseNotes>ChangeCanExecute will re-evaluate the FriendlyName property if it was set with a Func&lt;string&gt;</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for handling exceptions via SetExceptionHandler(..) builder method.
+Added SetExecuteAsync overloads to replace the asynchronous SetExecute methods.</PackageReleaseNotes>
     <Company>Function Zero Ltd</Company>
   </PropertyGroup>
 
