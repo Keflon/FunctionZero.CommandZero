@@ -1,5 +1,6 @@
 # FunctionZero.CommandZeroAsync
-Fully featured ICommand implementation
+Fully featured ICommand implementation  
+NuGet package [here](https://www.nuget.org/packages/FunctionZero.CommandZero) 
 
 
 ## Usage
